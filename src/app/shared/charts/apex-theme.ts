@@ -46,7 +46,6 @@ export function buildPriceChartTheme(
         shadeIntensity: 1,
         opacityFrom: effective === 'dark' ? 0.35 : 0.25,
         opacityTo: 0,
-        stops: [0, 100],
       },
     },
     tooltip: {
