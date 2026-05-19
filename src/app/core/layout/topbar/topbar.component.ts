@@ -5,6 +5,8 @@ import { filter } from 'rxjs/operators';
 
 import { AuthService } from '../../services/auth.service';
 import { Theme, ThemeService } from '../../services/theme.service';
+import { WatchlistService } from '../../../features/watchlist/services/watchlist.service';
+import { WatchlistSecurity } from '../../../features/watchlist/models/watchlist.model';
 
 type ThemeIcon = 'sun' | 'moon' | 'monitor';
 
@@ -22,23 +24,6 @@ const THEME_LABELS: Record<Theme, string> = {
 
 const COMMAND_PALETTE_EVENT = 'banka:open-command-palette';
 
-/**
- * PR_31 Task 7: TopbarComponent
- *
- * Sticky horizontalna traka iznad glavnog sadrzaja. Sadrzi:
- *   - levo: route breadcrumb derived iz `Router.url`.
- *   - desno: `Pretrazi` trigger (otvara command palette kroz globalni event),
- *     theme toggle dropdown (3 opcije: Sistem / Svetla / Tamna), bell icon
- *     placeholder, avatar krug sa user inicijalima + dropdown (Profil / Odjava).
- *
- * Ctrl+K / Cmd+K hotkey otvara command palette preko `window.dispatchEvent`
- * (`banka:open-command-palette`) — Task 8 ce dodati listener u
- * CommandPaletteComponent.
- *
- * `AuthService.getLoggedUser()` vraca samo `{ email, permissions }` (verified u
- * auth.service.ts:424) — nema firstName/lastName / ime/prezime, pa inicijale
- * derivimo iz email lokalnog dela (split po `.` `_` `-`, prva slova segmenata).
- */
 @Component({
   selector: 'app-topbar',
   templateUrl: './topbar.component.html',
@@ -48,8 +33,13 @@ export class TopbarComponent implements OnInit, OnDestroy {
   breadcrumb: string[] = [];
   themeMenuOpen = false;
   avatarMenuOpen = false;
+  watchlistMenuOpen = false;
+
   userInitials = '';
+  watchlistPreview: WatchlistSecurity[] = [];
+
   private sub?: Subscription;
+  private watchlistSub?: Subscription;
 
   readonly themes: Theme[] = ['system', 'light', 'dark'];
 
@@ -57,20 +47,29 @@ export class TopbarComponent implements OnInit, OnDestroy {
     public theme: ThemeService,
     private auth: AuthService,
     private router: Router,
+    private watchlistService: WatchlistService,
   ) {}
 
   ngOnInit(): void {
     this.refreshBreadcrumb(this.router.url);
     this.userInitials = this.computeInitials();
+
     this.sub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe((e) => {
         this.refreshBreadcrumb((e as NavigationEnd).urlAfterRedirects);
       });
+
+    this.watchlistSub = this.watchlistService.watchlists$.subscribe((watchlists) => {
+      this.watchlistPreview = watchlists
+        .flatMap((watchlist) => watchlist.securities)
+        .slice(0, 4);
+    });
   }
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.watchlistSub?.unsubscribe();
   }
 
   setTheme(t: Theme): void {
@@ -80,6 +79,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   openCommandPalette(): void {
     window.dispatchEvent(new CustomEvent(COMMAND_PALETTE_EVENT));
+  }
+
+  toggleWatchlistMenu(): void {
+    const next = !this.watchlistMenuOpen;
+    this.closeMenus();
+    this.watchlistMenuOpen = next;
   }
 
   toggleThemeMenu(): void {
@@ -97,11 +102,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
   closeMenus(): void {
     this.themeMenuOpen = false;
     this.avatarMenuOpen = false;
+    this.watchlistMenuOpen = false;
   }
 
   logout(): void {
-    /* `AuthService.logout()` vec navigira na /login (auth.service.ts:188), tako
-       da ne treba dodatni `router.navigate`. */
     this.auth.logout();
   }
 
@@ -113,12 +117,51 @@ export class TopbarComponent implements OnInit, OnDestroy {
     return THEME_LABELS[t];
   }
 
+  formatHeaderPrice(security: WatchlistSecurity): string {
+    const currency = security.currency ?? 'USD';
+
+    return `${this.formatNumber(security.price)} ${currency}`;
+  }
+
+  formatHeaderChange(security: WatchlistSecurity): string {
+    const sign = security.dailyChangePercent >= 0 ? '+' : '';
+
+    return `${sign}${this.formatNumber(security.dailyChangePercent)}%`;
+  }
+
+  getHeaderChangeClass(security: WatchlistSecurity): string {
+    if (security.dailyChangePercent > 0) {
+      return 'quick-change-positive';
+    }
+
+    if (security.dailyChangePercent < 0) {
+      return 'quick-change-negative';
+    }
+
+    return 'quick-change-neutral';
+  }
+
+  formatHeaderVolume(security: WatchlistSecurity): string {
+    return new Intl.NumberFormat('sr-RS').format(security.volume);
+  }
+
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent): void {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       this.openCommandPalette();
     }
+
+    if (e.key === 'Escape') {
+      this.closeMenus();
+    }
+  }
+
+  private formatNumber(value: number): string {
+    return new Intl.NumberFormat('sr-RS', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
   }
 
   private refreshBreadcrumb(url: string): void {
@@ -126,20 +169,25 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.breadcrumb = segments;
   }
 
-  /**
-   * Email "aleksa.mojovic@banka.com" -> "AM".
-   * Email "admin@banka.com" -> "AD" (fallback: prva dva slova local part-a).
-   * Bez korisnika -> "?".
-   */
   private computeInitials(): string {
     const user = this.auth.getLoggedUser();
-    if (!user?.email) return '?';
+
+    if (!user?.email) {
+      return '?';
+    }
+
     const local = user.email.split('@')[0] ?? '';
-    if (!local) return '?';
+
+    if (!local) {
+      return '?';
+    }
+
     const parts = local.split(/[._-]+/).filter(Boolean);
+
     if (parts.length >= 2) {
       return ((parts[0][0] ?? '') + (parts[1][0] ?? '')).toUpperCase() || '?';
     }
+
     return local.slice(0, 2).toUpperCase() || '?';
   }
 }
