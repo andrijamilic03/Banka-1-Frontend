@@ -35,6 +35,8 @@ import { OrdersOverviewComponent } from './features/employee/components/orders-o
 import { PortfolioComponent } from './features/client/components/portfolio/portfolio.component';
 import { ProfileComponent } from './features/client/components/profile/profile.component';
 import { portfolioAccessGuard } from './core/guards/portfolio-access.guard';
+import { AuditLogComponent } from './features/employee/components/audit-log/audit-log.component';
+import { RecurringOrderComponent } from './features/orders/components/recurring-order/recurring-order.component';
 
 const routes: Routes = [
   {
@@ -255,6 +257,22 @@ const routes: Routes = [
     loadChildren: () =>
       import('./features/funds/funds.module').then((m) => m.FundsModule),
     canActivate: [authGuard],
+  },
+  {
+  path: 'audit-log',
+  component: AuditLogComponent,
+  canActivate: [authGuard, roleGuard],
+  data: {
+    allowedRoles: ['Admin', 'Supervisor']
+  }
+  },
+  {
+  path: 'recurring-orders',
+  component: RecurringOrderComponent,
+  canActivate: [authGuard, roleGuard],
+  data: {
+    anyRole: ['CLIENT_TRADING', 'AGENT', 'SUPERVISOR', 'ADMIN']
+  }
   },
   {
     path: '**',

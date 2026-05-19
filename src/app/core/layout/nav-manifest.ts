@@ -72,11 +72,12 @@ export const NAV_MANIFEST: NavGroup[] = [
        supervizori (TRADE_UNLIMITED/SECURITIES_TRADE_UNLIMITED), admin. */
     label: 'Berza',
     items: [
-      { label: 'Hartije od vrednosti', route: '/securities',  icon: 'trendingup', requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING'] },
-      { label: 'Moj portfolio',        route: '/portfolio',   icon: 'briefcase',  requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING'] },
-      { label: 'Marzni racun',         route: '/margin',      icon: 'gauge',      requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING', 'ADMIN'] },
-      { label: 'OTC trgovina',         route: '/otc',         icon: 'handshake',  requiredPermissions: ['OTC_TRADE', 'CLIENT_TRADING', 'TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED', 'SUPERVISOR', 'ADMIN'] },
-      { label: 'Fondovi',              route: '/funds',       icon: 'building',   requiredPermissions: ['FUND_AGENT_MANAGE', 'CLIENT_TRADING', 'TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED', 'SUPERVISOR', 'ADMIN'] },
+      { label: 'Hartije od vrednosti',   route: '/securities',       icon: 'trendingup', requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING'] },
+      { label: 'Moj portfolio',          route: '/portfolio',        icon: 'briefcase',  requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING'] },
+      { label: 'Marzni racun',           route: '/margin',           icon: 'gauge',      requiredPermissions: ['SECURITIES_TRADE_UNLIMITED', 'SECURITIES_TRADE_LIMITED', 'TRADE_UNLIMITED', 'CLIENT_TRADING', 'ADMIN'] },
+      { label: 'OTC trgovina',           route: '/otc',              icon: 'handshake',  requiredPermissions: ['OTC_TRADE', 'CLIENT_TRADING', 'TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED', 'SUPERVISOR', 'ADMIN'] },
+      { label: 'Fondovi',                route: '/funds',            icon: 'building',   requiredPermissions: ['FUND_AGENT_MANAGE', 'CLIENT_TRADING', 'TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED', 'SUPERVISOR', 'ADMIN'] },
+      { label: 'Trajni nalozi',          route: '/recurring-orders', icon: 'briefcase',  requiredPermissions: [ 'CLIENT_TRADING','SECURITIES_TRADE_LIMITED','TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED' ] },
     ],
   },
   {
@@ -91,6 +92,7 @@ export const NAV_MANIFEST: NavGroup[] = [
       { label: 'Aktuari',           route: '/actuary-management',        icon: 'shieldcheck', requiredPermissions: ['FUND_AGENT_MANAGE', 'EMPLOYEE_MANAGE_ALL', 'ADMIN'] },
       { label: 'Pregled order',     route: '/orders-overview',           icon: 'receipt',     requiredPermissions: ['TRADE_UNLIMITED', 'EMPLOYEE_MANAGE_ALL', 'ADMIN'] },
       { label: 'Porez tracking',    route: '/tax-tracking',              icon: 'receipt',     requiredPermissions: ['TRADE_UNLIMITED', 'EMPLOYEE_MANAGE_ALL', 'ADMIN', 'SUPERVISOR'] },
+      { label: 'Audit log',         route: '/audit-log',                 icon: 'receipt',     requiredPermissions: ['EMPLOYEE_MANAGE_ALL', 'ADMIN', 'SUPERVISOR'] },
       { label: 'Krediti admin',     route: '/loan-management',           icon: 'piggybank',   requiredPermissions: ['CLIENT_MANAGE', 'EMPLOYEE_MANAGE_ALL', 'ADMIN'] },
       { label: 'Kartice',           route: '/cards-management',          icon: 'creditcard',  requiredPermissions: ['CLIENT_MANAGE', 'EMPLOYEE_MANAGE_ALL', 'ADMIN'] },
       { label: 'Zahtevi za kredit', route: '/loan-request-management',   icon: 'piggybank',   requiredPermissions: ['CLIENT_MANAGE', 'EMPLOYEE_MANAGE_ALL', 'ADMIN'] },
