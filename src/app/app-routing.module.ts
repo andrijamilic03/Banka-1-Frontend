@@ -35,6 +35,7 @@ import { OrdersOverviewComponent } from './features/employee/components/orders-o
 import { PortfolioComponent } from './features/client/components/portfolio/portfolio.component';
 import { ProfileComponent } from './features/client/components/profile/profile.component';
 import { portfolioAccessGuard } from './core/guards/portfolio-access.guard';
+import { PriceAlertsPageComponent } from './features/price-alerts/components/price-alerts/price-alerts.component';
 
 const routes: Routes = [
   {
@@ -130,7 +131,7 @@ const routes: Routes = [
   path: 'stock-exchange',
   component: ExchangeListComponent,
   canActivate: [authGuard, roleGuard],
-  data: { roles: ['ADMIN', 'SUPERVISOR'] } 
+  data: { roles: ['ADMIN', 'SUPERVISOR'] }
   },
   {
     path: 'exchange',
@@ -151,6 +152,12 @@ const routes: Routes = [
     path: 'profile',
     component: ProfileComponent,
     canActivate: [authGuard],
+  },
+  {
+    path: 'price-alerts',
+    component: PriceAlertsPageComponent,
+    canActivate: [authGuard, portfolioAccessGuard],
+    data: { title: 'Price alerti' },
   },
   {
     path: '',
