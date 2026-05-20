@@ -1,12 +1,13 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '../../services/auth.service';
 import { Theme, ThemeService } from '../../services/theme.service';
 import { AppNotification } from '../../../shared/models/app-notification.model';
 import { AppNotificationService } from '../../../shared/services/app-notification.service';
+import { OtcService } from '../../../features/otc/services/otc.service';
 
 type ThemeIcon = 'sun' | 'moon' | 'monitor';
 
@@ -30,8 +31,8 @@ const COMMAND_PALETTE_EVENT = 'banka:open-command-palette';
  * Sticky horizontalna traka iznad glavnog sadrzaja. Sadrzi:
  *   - levo: route breadcrumb derived iz `Router.url`.
  *   - desno: `Pretrazi` trigger (otvara command palette kroz globalni event),
- *     theme toggle dropdown (3 opcije: Sistem / Svetla / Tamna), bell icon
- *     placeholder, avatar krug sa user inicijalima + dropdown (Profil / Odjava).
+ *     theme toggle dropdown (3 opcije: Sistem / Svetla / Tamna), notifikacije (zvonce),
+ *     avatar krug sa user inicijalima + dropdown (Profil / Odjava).
  *
  * Ctrl+K / Cmd+K hotkey otvara command palette preko `window.dispatchEvent`
  * (`banka:open-command-palette`) — Task 8 ce dodati listener u
@@ -53,8 +54,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   notificationMenuOpen = false;
   notifications: AppNotification[] = [];
   userInitials = '';
-  private sub?: Subscription;
-  private notificationSub?: Subscription;
+  private notificationMenuFocusIndex = -1;
+  private readonly destroy$ = new Subject<void>();
 
   readonly themes: Theme[] = ['system', 'light', 'dark'];
 
@@ -63,36 +64,67 @@ export class TopbarComponent implements OnInit, OnDestroy {
     private auth: AuthService,
     private router: Router,
     private appNotifications: AppNotificationService,
+    private otcService: OtcService,
   ) {}
 
   ngOnInit(): void {
     this.refreshBreadcrumb(this.router.url);
     this.userInitials = this.computeInitials();
-    this.sub = this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntil(this.destroy$),
+      )
       .subscribe((e) => {
         this.refreshBreadcrumb((e as NavigationEnd).urlAfterRedirects);
       });
 
+    this.appNotifications.hydrateFromStorage();
     this.notifications = this.appNotifications.snapshot;
-    this.notificationSub = this.appNotifications.notifications$.subscribe((items) => {
-      this.notifications = items;
-    });
+    this.appNotifications.notifications$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((items) => {
+        this.notifications = items;
+      });
   }
 
   ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-    this.notificationSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get unreadNotificationCount(): number {
     return this.notifications.filter((n) => !n.read).length;
   }
 
+  notificationBellAriaLabel(): string {
+    const count = this.unreadNotificationCount;
+    if (count === 0) return 'Notifikacije';
+    if (count === 1) return 'Notifikacije, 1 novo obaveštenje';
+    return `Notifikacije, ${count} nova obaveštenja`;
+  }
+
+  unreadBadgeAriaLabel(): string {
+    const count = this.unreadNotificationCount;
+    return count === 1 ? '1 novo obaveštenje' : `${count} novih obaveštenja`;
+  }
+
+  trackByNotificationId(_index: number, n: AppNotification): string {
+    return n.id;
+  }
+
+  onNotificationMenuKeydown(event: KeyboardEvent, n: AppNotification): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.openNotification(n);
+    }
+  }
+
   toggleNotificationMenu(): void {
     const next = !this.notificationMenuOpen;
     this.closeMenus();
     this.notificationMenuOpen = next;
+    this.notificationMenuFocusIndex = -1;
   }
 
   openNotification(n: AppNotification): void {
@@ -128,9 +160,12 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.themeMenuOpen = false;
     this.avatarMenuOpen = false;
     this.notificationMenuOpen = false;
+    this.notificationMenuFocusIndex = -1;
   }
 
   logout(): void {
+    this.appNotifications.clear();
+    this.otcService.clearPollCache();
     /* `AuthService.logout()` vec navigira na /login (auth.service.ts:188), tako
        da ne treba dodatni `router.navigate`. */
     this.auth.logout();
@@ -146,10 +181,39 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   onKeydown(e: KeyboardEvent): void {
+    if (e.key === 'Escape') {
+      if (this.notificationMenuOpen || this.themeMenuOpen || this.avatarMenuOpen) {
+        this.closeMenus();
+        return;
+      }
+    }
+
+    if (this.notificationMenuOpen && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+      e.preventDefault();
+      this.notificationMenuFocusIndex += e.key === 'ArrowDown' ? 1 : -1;
+      this.focusNotificationMenuItem(this.notificationMenuFocusIndex);
+      return;
+    }
+
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
       this.openCommandPalette();
     }
+  }
+
+  private focusNotificationMenuItem(index: number): void {
+    const menu = document.getElementById('notification-menu');
+    if (!menu) return;
+
+    const items = Array.from(
+      menu.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])'),
+    );
+    if (items.length === 0) return;
+
+    const normalized =
+      ((index % items.length) + items.length) % items.length;
+    items[normalized].focus();
+    this.notificationMenuFocusIndex = normalized;
   }
 
   private refreshBreadcrumb(url: string): void {

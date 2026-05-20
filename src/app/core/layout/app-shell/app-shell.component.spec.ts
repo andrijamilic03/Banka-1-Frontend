@@ -8,9 +8,10 @@ import { OtcNotificationMonitorService } from '../../../features/otc/services/ot
 describe('AppShellComponent', () => {
   let fixture: ComponentFixture<AppShellComponent>;
   let component: AppShellComponent;
+  let otcMonitor: jasmine.SpyObj<OtcNotificationMonitorService>;
 
   beforeEach(async () => {
-    const otcMonitor = jasmine.createSpyObj('OtcNotificationMonitorService', ['start', 'stop']);
+    otcMonitor = jasmine.createSpyObj('OtcNotificationMonitorService', ['start', 'stop']);
 
     await TestBed.configureTestingModule({
       declarations: [AppShellComponent],
@@ -48,5 +49,13 @@ describe('AppShellComponent', () => {
     spyOnProperty(router, 'url', 'get').and.returnValue('/');
     fixture.detectChanges();
     expect(component.isAuthRoute).toBe(true);
+  });
+
+  it('stops OTC monitor on destroy', () => {
+    const router = TestBed.inject(Router);
+    spyOnProperty(router, 'url', 'get').and.returnValue('/home');
+    fixture.detectChanges();
+    fixture.destroy();
+    expect(otcMonitor.stop).toHaveBeenCalled();
   });
 });

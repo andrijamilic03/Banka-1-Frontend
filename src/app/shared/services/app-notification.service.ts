@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
+import { AuthService } from '../../core/services/auth.service';
 import {
   AppNotification,
   AppNotificationCategory,
@@ -10,13 +11,17 @@ import { ToastService } from './toast.service';
 
 const MAX_NOTIFICATIONS = 50;
 const DEDUPE_WINDOW_MS = 60 * 60 * 1000;
+const STORAGE_KEY_PREFIX = 'app-notifications';
 
 @Injectable({ providedIn: 'root' })
 export class AppNotificationService {
   private readonly itemsSubject = new BehaviorSubject<AppNotification[]>([]);
   readonly notifications$ = this.itemsSubject.asObservable();
 
-  constructor(private toast: ToastService) {}
+  constructor(
+    private toast: ToastService,
+    private auth: AuthService,
+  ) {}
 
   get snapshot(): AppNotification[] {
     return this.itemsSubject.value;
@@ -24,6 +29,15 @@ export class AppNotificationService {
 
   get unreadCount(): number {
     return this.snapshot.filter((n) => !n.read).length;
+  }
+
+  /** Učitava inbox iz localStorage (po user id) nakon logina. */
+  hydrateFromStorage(): void {
+    if (this.snapshot.length > 0) return;
+    const stored = this.loadFromStorage();
+    if (stored.length > 0) {
+      this.itemsSubject.next(stored);
+    }
   }
 
   push(params: {
@@ -34,6 +48,8 @@ export class AppNotificationService {
     route?: string;
     showToast?: boolean;
   }): void {
+    this.hydrateFromStorage();
+
     const now = Date.now();
     const existing = this.snapshot.find(
       (n) =>
@@ -55,6 +71,7 @@ export class AppNotificationService {
 
     const next = [notification, ...this.snapshot].slice(0, MAX_NOTIFICATIONS);
     this.itemsSubject.next(next);
+    this.persist(next);
 
     if (params.showToast !== false) {
       this.toast.info(params.message);
@@ -62,16 +79,53 @@ export class AppNotificationService {
   }
 
   markRead(id: string): void {
-    this.itemsSubject.next(
-      this.snapshot.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    const next = this.snapshot.map((n) => (n.id === id ? { ...n, read: true } : n));
+    this.itemsSubject.next(next);
+    this.persist(next);
   }
 
   markAllRead(): void {
-    this.itemsSubject.next(this.snapshot.map((n) => ({ ...n, read: true })));
+    const next = this.snapshot.map((n) => ({ ...n, read: true }));
+    this.itemsSubject.next(next);
+    this.persist(next);
   }
 
   clear(): void {
     this.itemsSubject.next([]);
+    const key = this.storageKey();
+    if (key) {
+      localStorage.removeItem(key);
+    }
+  }
+
+  private storageKey(): string | null {
+    const userId = this.auth.getUserIdFromToken();
+    return userId != null ? `${STORAGE_KEY_PREFIX}:${userId}` : null;
+  }
+
+  private loadFromStorage(): AppNotification[] {
+    const key = this.storageKey();
+    if (!key) return [];
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw) as unknown;
+      if (!Array.isArray(parsed)) return [];
+      return (parsed as AppNotification[]).slice(0, MAX_NOTIFICATIONS);
+    } catch {
+      return [];
+    }
+  }
+
+  private persist(items: AppNotification[]): void {
+    const key = this.storageKey();
+    if (!key) return;
+
+    try {
+      localStorage.setItem(key, JSON.stringify(items.slice(0, MAX_NOTIFICATIONS)));
+    } catch {
+      // Quota exceeded ili privatni režim — inbox ostaje samo u memoriji.
+    }
   }
 }
