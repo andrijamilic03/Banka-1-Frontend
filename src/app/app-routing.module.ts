@@ -37,6 +37,8 @@ import { ProfileComponent } from './features/client/components/profile/profile.c
 import { portfolioAccessGuard } from './core/guards/portfolio-access.guard';
 import { AuditLogComponent } from './features/employee/components/audit-log/audit-log.component';
 import { RecurringOrderComponent } from './features/orders/components/recurring-order/recurring-order.component';
+import { WatchlistComponent } from './features/watchlist/components/watchlist/watchlist.component';
+import { MyOrdersComponent } from './features/orders/components/my-orders/my-orders.component';
 import { PriceAlertsPageComponent } from './features/price-alerts/components/price-alerts/price-alerts.component';
 
 const routes: Routes = [
@@ -130,10 +132,10 @@ const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-  path: 'stock-exchange',
-  component: ExchangeListComponent,
-  canActivate: [authGuard, roleGuard],
-  data: { roles: ['ADMIN', 'SUPERVISOR'] }
+    path: 'stock-exchange',
+    component: ExchangeListComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
     path: 'exchange',
@@ -154,6 +156,15 @@ const routes: Routes = [
     path: 'profile',
     component: ProfileComponent,
     canActivate: [authGuard],
+  },
+  {
+    path: 'watchlist',
+    component: WatchlistComponent,
+  },
+  {
+    path: 'my-orders',
+    component: MyOrdersComponent,
+    canActivate: [authGuard, portfolioAccessGuard],
   },
   {
     path: 'price-alerts',
@@ -242,7 +253,7 @@ const routes: Routes = [
   {
     path: 'orders/create/:direction/:listingId',
     component: CreateOrderComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     // PR_03 C3.8: portal za marzne racune (lazy-loaded).
@@ -284,7 +295,7 @@ const routes: Routes = [
   {
     path: '**',
     component: NotFoundComponent,
-  }
+  },
 ];
 
 @NgModule({
