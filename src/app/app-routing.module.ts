@@ -130,10 +130,10 @@ const routes: Routes = [
     canActivate: [authGuard],
   },
   {
-  path: 'stock-exchange',
-  component: ExchangeListComponent,
-  canActivate: [authGuard, roleGuard],
-  data: { roles: ['ADMIN', 'SUPERVISOR'] }
+    path: 'stock-exchange',
+    component: ExchangeListComponent,
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ADMIN', 'SUPERVISOR'] },
   },
   {
     path: 'exchange',
@@ -251,7 +251,7 @@ const routes: Routes = [
   {
     path: 'orders/create/:direction/:listingId',
     component: CreateOrderComponent,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
   {
     // PR_03 C3.8: portal za marzne racune (lazy-loaded).
@@ -277,7 +277,7 @@ const routes: Routes = [
   {
     path: '**',
     component: NotFoundComponent,
-  }
+  },
 ];
 
 @NgModule({
