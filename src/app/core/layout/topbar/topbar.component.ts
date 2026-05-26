@@ -1,6 +1,6 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '../../services/auth.service';
@@ -103,6 +103,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.sub?.unsubscribe();
+    this.watchlistSub?.unsubscribe();
   }
 
   get unreadNotificationCount(): number {
@@ -152,11 +154,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-    this.watchlistSub?.unsubscribe();
-  }
-
   setTheme(t: Theme): void {
     this.theme.setTheme(t);
     this.themeMenuOpen = false;
@@ -197,9 +194,6 @@ export class TopbarComponent implements OnInit, OnDestroy {
     /* `AuthService.logout()` vec navigira na /login (auth.service.ts:188), tako
        da ne treba dodatni `router.navigate`. */
     this.watchlistMenuOpen = false;
-  }
-
-  logout(): void {
     this.auth.logout();
   }
 
