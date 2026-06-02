@@ -13,6 +13,12 @@ export class AccountService {
 
   constructor(private http: HttpClient) {}
 
+  getSifreDelatnosti(): Observable<{ sifra: string; grana: string }[]> {
+    return this.http.get<{ sifra: string; grana: string }[]>(
+      `${this.api}/api/sifra-delatnosti`
+    );
+  }
+
   getMyAccounts(): Observable<Account[]> {
     const page = 0;
     const size = 50;

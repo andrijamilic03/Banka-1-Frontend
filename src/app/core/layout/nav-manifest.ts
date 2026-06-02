@@ -52,20 +52,21 @@ export interface NavGroup {
  */
 export const NAV_MANIFEST: NavGroup[] = [
   {
-    /* Klijent flow — gate-ujemo po ROLI ('CLIENT' regular ili 'CLIENT_TRADING') NE po
+    /* Klijent flow — gate-ujemo po ROLI ('CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING') NE po
        BANKING_BASIC permisiji. Razlog: admin/aktuari/basic-employee TAKOĐE imaju
        BANKING_BASIC u JWT-u (kako bi mogli da gledaju klijent rute za potrebe testa),
        ali nisu klijenti banke. Role-based gating ih prirodno isključuje bez hideFor. */
     label: 'Bankarstvo',
     items: [
-      { label: 'Pocetna',                  route: '/home',                  icon: 'home',       requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Racuni',                   route: '/accounts',              icon: 'wallet',     requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Placanja',                 route: '/accounts/payment/new',  icon: 'send',       requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Transfer (ista valuta)',   route: '/transfers/same',        icon: 'send',       requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Transfer (razl. valute)',  route: '/transfers/different',   icon: 'trendingup', requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Menjacnica',               route: '/exchange',              icon: 'trendingup', requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Kartice',                  route: '/home/cards',            icon: 'creditcard', requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
-      { label: 'Krediti',                  route: '/loans',                 icon: 'piggybank',  requiredPermissions: ['CLIENT', 'CLIENT_TRADING'] },
+      { label: 'Pocetna',                  route: '/home',                  icon: 'home',       requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Racuni',                   route: '/accounts',              icon: 'wallet',     requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Placanja',                 route: '/accounts/payment/new',  icon: 'send',       requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Transfer (ista valuta)',   route: '/transfers/same',        icon: 'send',       requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Transfer (razl. valute)',  route: '/transfers/different',   icon: 'trendingup', requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Menjacnica',               route: '/exchange',              icon: 'trendingup', requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Kartice',                  route: '/home/cards',            icon: 'creditcard', requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Krediti',                  route: '/loans',                 icon: 'piggybank',  requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
+      { label: 'Primaoci placanja',        route: '/payments/recipients',   icon: 'users',      requiredPermissions: ['CLIENT', 'CLIENT_BASIC', 'CLIENT_TRADING'] },
     ],
   },
   {

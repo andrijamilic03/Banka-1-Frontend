@@ -23,6 +23,7 @@ export class NewPaymentComponent implements OnInit {
   public isLoading = true;
   public showVerificationModal = false;
   public transactionSuccess = false;
+  public transactionError = '';
   public isNewRecipient = false;
   public recipientSaved = false;
   public isSavingRecipient = false;
@@ -69,8 +70,8 @@ export class NewPaymentComponent implements OnInit {
     this.paymentForm = this.fb.group({
       senderAccount: ['', Validators.required],
       receiverName: ['', Validators.required],
-      // Tačno 18 cifara za račun primaoca (spec Celina 2: 3 + 4 + 9 + 2 = 18)
-      receiverAccount: ['', [Validators.required, Validators.pattern('^[0-9]{18}$')]],
+      // Tačno 19 cifara za račun primaoca
+      receiverAccount: ['', [Validators.required, Validators.pattern('^[0-9]{19}$')]],
       // Iznos mora biti veći od 0
       amount: ['', [Validators.required, Validators.min(0.01)]],
       // Šifra plaćanja: tačno 3 cifre, default za e-banking je obično 289
@@ -124,6 +125,7 @@ export class NewPaymentComponent implements OnInit {
   }
 
   private executeTransaction(verificationSessionId: number): void {
+    this.transactionError = '';
     const form = this.paymentForm.value;
 
     const dto: NewPaymentDto = {
@@ -139,18 +141,32 @@ export class NewPaymentComponent implements OnInit {
 
     this.clientService.createPayment(dto).subscribe({
       next: () => {
-        // Add notification for successful payment
         this.notificationService.addNotification({
           type: NotificationType.PAYMENT,
           title: 'Plaćanje izvršeno',
           message: `Plaćanje od ${this.formatAmount(dto.amount)} sa računa ${dto.fromAccountNumber} primacu ${dto.recipientName} je uspešno izvršeno.`,
           data: { paymentDto: dto }
         });
+        this.refreshAccountsSilently();
         this.checkIfNewRecipient(form.senderAccount, form.receiverAccount);
       },
-      error: () => {
-        this.checkIfNewRecipient(form.senderAccount, form.receiverAccount);
+      error: (err: any) => {
+        const e = err?.error;
+        if (e?.errorTitle && e?.errorDesc) {
+          this.transactionError = `${e.errorTitle}: ${e.errorDesc}`;
+        } else {
+          this.transactionError = e?.message || e?.error || 'Plaćanje nije uspelo. Pokušajte ponovo.';
+        }
       }
+    });
+  }
+
+  private refreshAccountsSilently(): void {
+    this.accountService.getMyAccounts().subscribe({
+      next: (accounts) => {
+        this.myAccounts = accounts.filter(acc => acc.status === 'ACTIVE');
+      },
+      error: () => {}
     });
   }
 

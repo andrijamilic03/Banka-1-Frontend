@@ -227,6 +227,19 @@ export class PaymentHistoryComponent implements OnInit, OnDestroy {
     });
   }
 
+  public getSignedAmount(payment: Payment): number {
+    if (payment.payerAccountNumber === this.selectedAccountNumber) {
+      return -payment.initialAmount;
+    }
+    return payment.finalAmount;
+  }
+
+  public getAmountClass(payment: Payment): string {
+    return payment.payerAccountNumber === this.selectedAccountNumber
+      ? 'text-red-500'
+      : 'text-green-600';
+  }
+
   public formatAmount(amount: number): string {
     const prefix = amount >= 0 ? '+' : '';
 

@@ -35,9 +35,9 @@
           </div>
           <div>
             <label class="z-label">Račun primaoca</label>
-            <input type="text" formControlName="receiverAccount" class="z-input" placeholder="Npr. 111000100012345678" maxlength="18"
+            <input type="text" formControlName="receiverAccount" class="z-input" placeholder="Npr. 1110001000123456789" maxlength="19"
                    [class.border-destructive]="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched" />
-            <p class="z-error" *ngIf="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched">Unesite ispravan broj računa (18 cifara).</p>
+            <p class="z-error" *ngIf="paymentForm.get('receiverAccount')?.invalid && paymentForm.get('receiverAccount')?.touched">Unesite ispravan broj računa (19 cifara).</p>
           </div>
         </div>
 
@@ -113,6 +113,10 @@
                    [class.border-destructive]="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched" />
             <p class="z-error" *ngIf="paymentForm.get('referenceNumber')?.invalid && paymentForm.get('referenceNumber')?.touched">Dozvoljeni su samo brojevi i crtice.</p>
           </div>
+        </div>
+
+        <div *ngIf="transactionError" class="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {{ transactionError }}
         </div>
 
         <div class="flex justify-end gap-3 pt-2">

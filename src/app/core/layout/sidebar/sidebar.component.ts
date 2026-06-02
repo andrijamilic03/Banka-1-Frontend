@@ -30,9 +30,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const user = this.auth.getLoggedUser();
     const perms = user?.permissions ?? [];
     /* Klijent trading flow ima role='CLIENT_TRADING' ali prazan permissions[];
-       ubacujemo role u capability set kako bi NavManifest mogao da gada CLIENT_TRADING. */
-    const role = (user as any)?.role as string | undefined;
-    const capabilities = role ? [...perms, role] : perms;
+       ubacujemo role u capability set kako bi NavManifest mogao da gada CLIENT_TRADING.
+       JWT payload.roles moze biti string ILI niz stringova — normalizujemo u oba slucaja. */
+    const rawRole = (user as any)?.role;
+    const roles: string[] = Array.isArray(rawRole)
+      ? rawRole.map(String)
+      : rawRole
+      ? [String(rawRole)]
+      : [];
+    const capabilities = [...perms, ...roles];
     this.groups = filterNavByPermissions(NAV_MANIFEST, capabilities);
     this.currentUrl = this.router.url;
     this.sub = this.router.events

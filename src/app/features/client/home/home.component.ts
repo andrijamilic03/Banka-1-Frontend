@@ -61,6 +61,7 @@ export class HomeComponent implements OnInit {
   transactions: Transaction[] = [];
   transactionsLoading = false;
   transactionsError = false;
+  private transactionsAccountNumber = '';
 
   // ── Primaoci (brzo placanje) ────────────────
   paymentRecipients: PaymentRecipient[] = [];
@@ -114,6 +115,7 @@ export class HomeComponent implements OnInit {
     this.transactionsLoading = true;
     this.transactionsError = false;
     this.transactions = [];
+    this.transactionsAccountNumber = accountNumber;
 
     this.accountService.getTransactions(accountNumber, 0, 5).subscribe({
       next: (data: Transaction[]) => {
@@ -209,15 +211,9 @@ export class HomeComponent implements OnInit {
     return TX_TYPE_LABELS[t.type] ?? t.type ?? '';
   }
 
-  /**
-   * Iznos sa znakom: za sve transakcije sa nase strane (PAYMENT, TRANSFER,
-   * WITHDRAWAL) iznos je negativan; DEPOSIT je pozitivan. Backend ne salje
-   * znak, pa ga izvlacimo iz tipa.
-   */
   getTxAmount(t: Transaction): number {
     const abs = t.amount ?? 0;
-    if (t.type === 'DEPOSIT') return abs;
-    return -abs;
+    return t.fromAccountNumber === this.transactionsAccountNumber ? -abs : abs;
   }
 
   getTxCurrency(t: Transaction): string {

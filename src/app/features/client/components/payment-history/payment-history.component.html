@@ -232,7 +232,7 @@
               </td>
               <td class="font-medium">{{ payment.recipientName }}</td>
               <td>{{ payment.currency }}</td>
-              <td class="font-semibold">{{ formatAmount(payment.amount) }}</td>
+              <td class="font-semibold" [ngClass]="getAmountClass(payment)">{{ formatAmount(getSignedAmount(payment)) }}</td>
               <td>
                 <span
                   class="z-badge"
