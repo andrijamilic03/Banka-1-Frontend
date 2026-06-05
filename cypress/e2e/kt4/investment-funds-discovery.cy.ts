@@ -75,7 +75,7 @@ describe('Scenario 13: Sortiranje fondova', () => {
     cy.wait('@getFunds');
 
     cy.contains('button', 'Vrednost').should('be.visible').click();
-    cy.wait('@getFunds');
+    cy.contains('Alpha Growth Fund').should('be.visible');
   });
 });
 

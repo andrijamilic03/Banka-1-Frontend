@@ -14,7 +14,7 @@ function setNotificationsAndVisit(notifications: object[], visitUrl = '/home') {
     onBeforeLoad(win: any) {
       win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(CLIENT_USER));
-      win.localStorage.setItem('notifications', JSON.stringify(notifications));
+      win.localStorage.setItem('app-notifications:77', JSON.stringify(notifications));
     },
   });
 }

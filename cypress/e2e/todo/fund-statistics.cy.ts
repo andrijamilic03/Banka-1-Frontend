@@ -61,7 +61,7 @@ describe('Scenario 10: Sortiranje po godišnjem prinosu', () => {
     cy.wait('@getFunds');
 
     cy.contains('button', 'God. prinos').should('be.visible').click();
-    cy.wait('@getFunds');
+    cy.contains('Alpha Growth Fund').should('be.visible');
   });
 });
 
