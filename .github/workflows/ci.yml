@@ -34,10 +34,19 @@ jobs:
       - name: TypeScript type check
         run: npx tsc -p tsconfig.app.json --noEmit
 
-  # ── Cypress E2E Tests ─────────────────────────────────────────────────────
+  # ── Cypress E2E Tests (parallelno po grupama) ─────────────────────────────
   cypress:
-    name: Cypress E2E Tests
+    name: Cypress (${{ matrix.group }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: legacy
+            spec: 'cypress/e2e/*.cy.ts'
+          - group: kt
+            spec: 'cypress/e2e/kt3/**/*.cy.ts,cypress/e2e/kt4/**/*.cy.ts,cypress/e2e/kt5/**/*.cy.ts,cypress/e2e/todo/**/*.cy.ts'
+
     steps:
       - uses: actions/checkout@v4.2.2
 
@@ -123,7 +132,7 @@ jobs:
         if: steps.images-check.outputs.skip != 'true'
         run: npm run build
 
-      - name: Run Cypress tests
+      - name: Run Cypress tests (${{ matrix.group }})
         if: steps.images-check.outputs.skip != 'true'
         uses: cypress-io/github-action@v6
         with:
@@ -131,13 +140,14 @@ jobs:
           start: npx serve -s dist/banka-1-frontend -l 4200
           wait-on: "http://localhost:4200"
           wait-on-timeout: 60
+          spec: ${{ matrix.spec }}
           config: video=false
 
       - name: Upload screenshots on failure
         uses: actions/upload-artifact@v4.6.2
         if: failure()
         with:
-          name: cypress-screenshots-${{ github.run_id }}
+          name: cypress-screenshots-${{ github.run_id }}-${{ matrix.group }}
           path: cypress/screenshots
           if-no-files-found: ignore
           retention-days: 7

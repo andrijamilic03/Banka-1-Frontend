@@ -6,7 +6,7 @@ const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock'
 const CLIENT_USER = {
   email: 'client@banka.com',
   role: 'Client',
-  permissions: ['OTC_TRADE'],
+  permissions: ['OTC_TRADE', 'TRADE_UNLIMITED'],
 };
 
 const LOCAL_OFFER = {
