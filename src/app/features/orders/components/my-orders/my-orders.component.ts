@@ -220,6 +220,7 @@ export class MyOrdersComponent implements OnInit {
         '-',
       securityType:
         anyOrder.securityType ??
+        anyOrder.listingType ??
         listing.securityType ??
         listing.type ??
         'ALL',
