@@ -2,6 +2,8 @@
 // Scenarios 24, 26, 29–31, 33, 36–37, 43, 45: Kreiranje naloga
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_SECURITY = {
   id: 42,
   ticker: 'AAPL',
@@ -70,7 +72,7 @@ const setupInterceptsAndVisit = (direction = 'BUY', securityOverride = {}) => {
 
   cy.visit(`/orders/create/${direction}/42`, {
     onBeforeLoad: (win) => {
-      win.localStorage.setItem('authToken', 'fake-jwt-token');
+      win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(clientUser));
     },
   });

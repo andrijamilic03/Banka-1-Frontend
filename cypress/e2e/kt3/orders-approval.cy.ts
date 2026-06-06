@@ -2,6 +2,8 @@
 // Scenarios 48–58: Odobravanje i pregled naloga
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_PENDING_ORDER = {
   orderId: 1,
   agentName: 'Marko Petrovic',
@@ -46,7 +48,7 @@ const visitOrdersAs = (user: object, orders = [MOCK_PENDING_ORDER]) => {
 
   cy.visit('/orders-overview', {
     onBeforeLoad: (win: any) => {
-      win.localStorage.setItem('authToken', 'fake-jwt-token');
+      win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(user));
     },
   });
@@ -89,7 +91,7 @@ describe('Scenario 52: Odobravanje pending ordera', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
@@ -129,7 +131,7 @@ describe('Scenario 53: Odbijanje pending ordera', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
@@ -159,7 +161,7 @@ describe('Scenario 54: Istekli order – samo Decline', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
@@ -191,7 +193,7 @@ describe('Scenario 56: Filter Pending', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
@@ -221,7 +223,7 @@ describe('Scenario 57: Filter Done', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
@@ -250,7 +252,7 @@ describe('Scenario 48: Klijentov order – automatski Approved', () => {
 
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });

@@ -15,10 +15,33 @@ const LOCAL_OFFER = {
   status: 'PENDING_BUYER', modifiedBy: '88', interbank: false, counterpartyBankName: null,
 };
 
-const EXTERNAL_OFFER = {
-  id: 10, stockTicker: 'GOOGL', buyerId: 77, sellerId: 999, amount: 25,
-  pricePerStock: 185.0, premium: 500, settlementDate: '2027-11-30',
-  status: 'PENDING_BUYER', modifiedBy: '999', interbank: true, counterpartyBankName: 'Banka 2',
+// InterbankNegotiationView objects — toOfferFromNegotiation() maps these to OtcOffer with interbank=true
+const EXTERNAL_INTERBANK_NEG = {
+  localId: 'neg-10',
+  remoteForeignBankId: { routingNumber: 222, id: 999 },
+  state: {
+    stock: { ticker: 'GOOGL' },
+    amount: 25,
+    pricePerUnit: { amount: 185.0 },
+    premium: { amount: 500 },
+    settlementDate: '2027-11-30',
+    isOngoing: true,
+    lastModifiedBy: { routingNumber: 222, id: 999 },
+  },
+};
+
+const COUNTER_INTERBANK_NEG = {
+  localId: 'neg-10',
+  remoteForeignBankId: { routingNumber: 222, id: 999 },
+  state: {
+    stock: { ticker: 'GOOGL' },
+    amount: 25,
+    pricePerUnit: { amount: 195.0 },
+    premium: { amount: 500 },
+    settlementDate: '2027-11-30',
+    isOngoing: true,
+    lastModifiedBy: { routingNumber: 222, id: 999 },
+  },
 };
 
 const CROSS_BANK_CONTRACT = {
@@ -27,11 +50,11 @@ const CROSS_BANK_CONTRACT = {
   status: 'ACTIVE', interbank: true, createdAt: '2026-04-01T10:00:00',
 };
 
-function interceptAllOtcApis(offers: object[] = [], contracts: object[] = []) {
+function interceptAllOtcApis(offers: object[] = [], contracts: object[] = [], interbankNegotiations: object[] = []) {
   cy.intercept('GET', /\/otc\/public-stocks/, { statusCode: 200, body: [] });
   cy.intercept('GET', /\/otc\/offers\/active/, { statusCode: 200, body: offers }).as('getOffers');
   cy.intercept('GET', /\/otc\/contracts\/my/, { statusCode: 200, body: contracts }).as('getContracts');
-  cy.intercept('GET', /\/api\/interbank\/otc/, { statusCode: 200, body: [] });
+  cy.intercept('GET', /\/api\/interbank\/otc\/negotiations/, { statusCode: 200, body: interbankNegotiations });
   cy.intercept('GET', /\/stocks\/price-feed/, { statusCode: 200, body: [] });
 }
 
@@ -49,7 +72,7 @@ function visitOtc() {
 describe('Scenario 4: Ponude druge banke', () => {
 
   it('Prikazuje ponude druge banke sa kolonom Banka prodavca', () => {
-    interceptAllOtcApis([LOCAL_OFFER, EXTERNAL_OFFER]);
+    interceptAllOtcApis([LOCAL_OFFER], [], [EXTERNAL_INTERBANK_NEG]);
     visitOtc();
 
     cy.contains('button', 'Aktivni pregovori').should('be.visible').click();
@@ -95,11 +118,7 @@ describe('Scenario 5: Kreiranje cross-bank ponude', () => {
 describe('Scenario 6: Kontraponuda iz druge banke', () => {
 
   it('Ponuda sa modifiedBy druge banke se prikazuje', () => {
-    interceptAllOtcApis([{
-      ...EXTERNAL_OFFER,
-      pricePerStock: 195.0, modifiedBy: '999',
-      lastModified: '2026-06-01T12:00:00', status: 'PENDING_BUYER',
-    }]);
+    interceptAllOtcApis([], [], [COUNTER_INTERBANK_NEG]);
     visitOtc();
 
     cy.contains('button', 'Aktivni pregovori').should('be.visible').click();

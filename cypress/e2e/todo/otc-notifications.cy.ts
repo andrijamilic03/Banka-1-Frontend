@@ -10,8 +10,15 @@ const CLIENT_USER = {
 };
 
 function setNotificationsAndVisit(notifications: object[], visitUrl = '/home') {
+  cy.intercept('GET', '**/api/interbank/otc/negotiations', { statusCode: 200, body: [] });
+  cy.intercept('GET', '**/otc/contracts/my**', { statusCode: 200, body: [] });
+  cy.intercept('GET', '**/otc/offers/active', { statusCode: 200, body: [] });
+  cy.intercept('GET', '**/accounts/client/accounts*', { statusCode: 200, body: { content: [], totalElements: 0 } });
+  cy.intercept('GET', '**/exchange/rates*', { statusCode: 200, body: [] });
+
   cy.visit(visitUrl, {
     onBeforeLoad(win: any) {
+      win.__OTC_POLL_MS = 5000;
       win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(CLIENT_USER));
       win.localStorage.setItem('app-notifications:77', JSON.stringify(notifications));

@@ -2,6 +2,8 @@
 // Scenarios 67–73: Moj portfolio
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_SUMMARY = {
   holdings: [
     {
@@ -54,7 +56,7 @@ const visitPortfolioAs = (user: object, summaryOverride = {}) => {
 
   cy.visit('/portfolio', {
     onBeforeLoad: (win) => {
-      win.localStorage.setItem('authToken', 'fake-jwt-token');
+      win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(user));
     },
   });

@@ -2,6 +2,8 @@
 // Scenario 10-18: Hartije od vrednosti – Prikaz i pretraga
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_STOCKS = [
   { id: 1, ticker: 'AAPL', name: 'Apple Inc.', exchange: 'NASDAQ', price: 185.5, volume: 1000000, change: 1.2, changePercent: 0.65 },
   { id: 2, ticker: 'MSFT', name: 'Microsoft Corp.', exchange: 'NASDAQ', price: 420.0, volume: 900000, change: -0.5, changePercent: -0.12 },
@@ -27,7 +29,7 @@ const loginAs = (user: object) => {
   cy.intercept('GET', '**/stock/api/stock-exchanges*', { statusCode: 200, body: [] }).as('getExchanges');
   cy.visit('/securities', {
     onBeforeLoad: (win: any) => {
-      win.localStorage.setItem('authToken', 'fake-jwt-token');
+      win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(user));
     },
   });
@@ -152,7 +154,7 @@ describe('Scenario 18: Detaljan prikaz hartije', () => {
 
     cy.visit('/securities/stock/AAPL', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(actuaryUser));
       },
     });

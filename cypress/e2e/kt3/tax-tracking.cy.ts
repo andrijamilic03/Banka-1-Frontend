@@ -2,6 +2,8 @@
 // Scenarios 74–79: Porez tracking
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_TAX_USERS = {
   content: [
     { firstName: 'Marko', lastName: 'Petrović', userType: 'CLIENT', taxDebtRsd: 5000, currentMonthTaxRsd: 1500, lastTaxCalculationDate: '2025-04-30' },
@@ -29,7 +31,7 @@ const clientUser = {
 const visitTaxAs = (user: object) => {
   cy.visit('/tax-tracking', {
     onBeforeLoad: (win) => {
-      win.localStorage.setItem('authToken', 'fake-jwt-token');
+      win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(user));
     },
   });

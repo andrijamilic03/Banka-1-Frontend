@@ -2,6 +2,8 @@
 // Scenario 82: Berze – prikaz liste i toggle za radno vreme
 export {};
 
+const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
+
 const MOCK_EXCHANGES = [
   {
     id: 1,
@@ -73,7 +75,7 @@ describe('Scenario 82: Lista berzi i toggle radnog vremena', () => {
 
     cy.visit('/stock-exchange', {
       onBeforeLoad: (win: any) => {
-        win.localStorage.setItem('authToken', 'fake-jwt-token');
+        win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
