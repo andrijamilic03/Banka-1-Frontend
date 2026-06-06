@@ -1,7 +1,7 @@
 // cypress/e2e/kt3/orders-approval.cy.ts
-// Scenarios 48–58: Odobravanje i pregled naloga
-export {};
+// KT3 — Portal Pregled ordera (Sc. 48-58)
 
+<<<<<<< Updated upstream
 const TOKEN_77 = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTksImlkIjo3N30.mock';
 
 const MOCK_PENDING_ORDER = {
@@ -17,63 +17,71 @@ const MOCK_PENDING_ORDER = {
   status: 'PENDING',
   settlementDate: '2099-12-31',
 };
+=======
+const TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjk5OTk5OTk5OTl9.mock';
+>>>>>>> Stashed changes
 
-const MOCK_DONE_ORDER = {
-  ...MOCK_PENDING_ORDER,
-  orderId: 2,
-  status: 'APPROVED',
-  remainingPortions: 0,
-  settlementDate: '2099-12-31',
-};
-
-const MOCK_EXPIRED_ORDER = {
-  ...MOCK_PENDING_ORDER,
-  orderId: 3,
-  status: 'PENDING',
-  settlementDate: '2020-01-01',
-};
-
-const supervisorUser = {
-  email: 'supervisor@banka.com',
+const SUPERVISOR = {
+  email: 'supervisor@bank.com',
   role: 'Supervisor',
-  permissions: ['TRADE_UNLIMITED', 'SECURITIES_TRADE_UNLIMITED', 'FUND_AGENT_MANAGE'],
+  permissions: ['TRADE_UNLIMITED'],
 };
 
-const visitOrdersAs = (user: object, orders = [MOCK_PENDING_ORDER]) => {
-  cy.intercept('GET', /\/order\/orders(\?.*)?$/, {
+const MOCK_ORDERS = {
+  content: [
+    { orderId: 1, agentName: 'Petar Petrović', orderType: 'MARKET', listingType: 'STOCK', quantity: 10, contractSize: 1, pricePerUnit: 185.5, direction: 'BUY', remainingPortions: 10, status: 'PENDING' },
+    { orderId: 2, agentName: 'Ana Anić', orderType: 'LIMIT', listingType: 'STOCK', quantity: 5, contractSize: 1, pricePerUnit: 420.0, direction: 'SELL', remainingPortions: 5, status: 'PENDING' },
+    { orderId: 3, agentName: 'Jovan Jovanović', orderType: 'STOP', listingType: 'FUTURES', quantity: 3, contractSize: 10, pricePerUnit: 19000.0, direction: 'BUY', remainingPortions: 3, status: 'APPROVED' },
+  ],
+  totalElements: 3,
+  totalPages: 1,
+  number: 0,
+  size: 10,
+};
+
+function visitOrdersOverview() {
+  cy.intercept('GET', /\/order\/orders/, {
     statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: { content: orders, totalElements: orders.length, totalPages: 1, number: 0, size: 10 },
+    body: MOCK_ORDERS,
   }).as('getOrders');
 
   cy.visit('/orders-overview', {
+<<<<<<< Updated upstream
     onBeforeLoad: (win: any) => {
       win.localStorage.setItem('authToken', TOKEN_77);
       win.localStorage.setItem('loggedUser', JSON.stringify(user));
+=======
+    onBeforeLoad(win: any) {
+      win.localStorage.setItem('authToken', TOKEN);
+      win.localStorage.setItem('loggedUser', JSON.stringify(SUPERVISOR));
+>>>>>>> Stashed changes
     },
   });
 
   cy.wait('@getOrders');
-};
+  cy.contains('h1', 'Pregled ordera', { timeout: 15000 }).should('be.visible');
+}
 
-// Scenario 55: Supervizor vidi sve potrebne kolone
-describe('Scenario 55: Kolone u pregledu ordera', () => {
-  beforeEach(() => {
-    visitOrdersAs(supervisorUser);
+describe('KT3 — Pregled ordera', () => {
+
+  // Sc. 48: Prikaz svih ordera
+  it('Sc. 48: Prikazuje tabelu sa svim orderima', () => {
+    visitOrdersOverview();
+
+    cy.contains('td', 'Petar Petrović').should('be.visible');
+    cy.contains('td', 'Ana Anić').should('be.visible');
+    cy.contains('td', 'Jovan Jovanović').should('be.visible');
+    cy.contains('th', 'Agent').should('be.visible');
+    cy.contains('th', 'Order type').should('be.visible');
+    cy.contains('th', 'Direction').should('be.visible');
+    cy.contains('th', 'Status').should('be.visible');
   });
 
-  it('prikazuje sve obavezne kolone tabele', () => {
-    cy.contains('th', /agent/i).should('be.visible');
-    cy.contains('th', /order type/i).should('be.visible');
-    cy.contains('th', /asset/i).should('be.visible');
-    cy.contains('th', /quantity/i).should('be.visible');
-    cy.contains('th', /price\/unit/i).should('be.visible');
-    cy.contains('th', /direction/i).should('be.visible');
-    cy.contains('th', /remaining/i).should('be.visible');
-    cy.contains('th', /status/i).should('be.visible');
-  });
-});
+  // Sc. 49: Filter — samo Pending
+  it('Sc. 49: Filtrira ordere po statusu Pending', () => {
+    visitOrdersOverview();
 
+<<<<<<< Updated upstream
 // Scenario 52: Supervizor odobrava pending order
 describe('Scenario 52: Odobravanje pending ordera', () => {
   beforeEach(() => {
@@ -202,12 +210,17 @@ describe('Scenario 56: Filter Pending', () => {
   });
 
   it('klik na filter Pending filtrira ordere', () => {
+=======
+>>>>>>> Stashed changes
     cy.contains('button', 'Pending').click();
     cy.wait('@getOrders');
-    cy.contains('button', 'Pending').should('have.class', 'z-btn-primary');
-  });
-});
 
+    cy.contains('td', 'Petar Petrović').should('be.visible');
+    cy.contains('td', 'Ana Anić').should('be.visible');
+    cy.contains('td', 'Jovan Jovanović').should('not.exist');
+  });
+
+<<<<<<< Updated upstream
 // Scenario 57: Filtriranje ordera po statusu Done
 describe('Scenario 57: Filter Done', () => {
   beforeEach(() => {
@@ -227,37 +240,103 @@ describe('Scenario 57: Filter Done', () => {
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
     });
+=======
+  // Sc. 50: Filter — Approved
+  it('Sc. 50: Filtrira ordere po statusu Approved', () => {
+    visitOrdersOverview();
+>>>>>>> Stashed changes
 
+    cy.contains('button', 'Approved').click();
     cy.wait('@getOrders');
+
+    cy.contains('td', 'Jovan Jovanović').should('be.visible');
+    cy.contains('td', 'Petar Petrović').should('not.exist');
   });
 
-  it('klik na filter Done prikazuje samo završene ordere', () => {
-    cy.contains('button', 'Done').click();
-    cy.wait('@getOrders');
-    cy.contains('button', 'Done').should('have.class', 'z-btn-primary');
-  });
-});
+  // Sc. 51: Filter — All (vraća sve)
+  it('Sc. 51: Filter All prikazuje sve ordere', () => {
+    visitOrdersOverview();
 
-// Scenario 48: Klijentov order automatski odobren (UI prikaz statusa)
-describe('Scenario 48: Klijentov order – automatski Approved', () => {
-  it('automatski odobren order ima status Approved bez Pending', () => {
-    cy.intercept('GET', /\/order\/orders(\?.*)?$/, {
+    cy.contains('button', 'Pending').click();
+    cy.wait('@getOrders');
+    cy.contains('button', 'All').click();
+    cy.wait('@getOrders');
+
+    cy.contains('td', 'Petar Petrović').should('be.visible');
+    cy.contains('td', 'Ana Anić').should('be.visible');
+    cy.contains('td', 'Jovan Jovanović').should('be.visible');
+  });
+
+  // Sc. 53: Approve ordera
+  it('Sc. 53: Odobrava pending order', () => {
+    cy.intercept('PUT', /\/order\/orders\/\d+\/approve/, {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: {
-        content: [{ ...MOCK_DONE_ORDER, status: 'APPROVED' }],
-        totalElements: 1, totalPages: 1, number: 0, size: 10,
-      },
-    }).as('getOrders');
+      body: {},
+    }).as('approveOrder');
 
+<<<<<<< Updated upstream
     cy.visit('/orders-overview', {
       onBeforeLoad: (win: any) => {
         win.localStorage.setItem('authToken', TOKEN_77);
         win.localStorage.setItem('loggedUser', JSON.stringify(supervisorUser));
       },
+=======
+    visitOrdersOverview();
+
+    cy.contains('tr', 'Petar Petrović').within(() => {
+      cy.contains('button', 'Approve').click();
+>>>>>>> Stashed changes
     });
 
+    cy.wait('@approveOrder');
+    cy.wait('@getOrders');  // reload posle akcije
+  });
+
+  // Sc. 54: Decline ordera
+  it('Sc. 54: Odbija pending order', () => {
+    cy.intercept('PUT', /\/order\/orders\/\d+\/decline/, {
+      statusCode: 200,
+      body: {},
+    }).as('declineOrder');
+
+    visitOrdersOverview();
+
+    cy.contains('tr', 'Ana Anić').within(() => {
+      cy.contains('button', 'Decline').click();
+    });
+
+    cy.wait('@declineOrder');
     cy.wait('@getOrders');
-    cy.contains('Approved').should('be.visible');
+  });
+
+  // Sc. 56: Cancel ordera — otvara dijalog
+  it('Sc. 56: Otvara dijalog za otkazivanje ordera', () => {
+    visitOrdersOverview();
+
+    cy.contains('tr', 'Jovan Jovanović').within(() => {
+      cy.get('[data-cy="cancel-order-btn"]').click();
+    });
+
+    cy.contains('Otkazivanje naloga').should('be.visible');
+    cy.contains('button', 'Potvrdi otkazivanje').should('be.visible');
+  });
+
+  // Sc. 57: Cancel — potvrda u dijalogu
+  it('Sc. 57: Potvrđuje otkazivanje ordera', () => {
+    cy.intercept('POST', /\/order\/orders\/\d+\/cancel/, {
+      statusCode: 200,
+      body: {},
+    }).as('cancelOrder');
+
+    visitOrdersOverview();
+
+    cy.contains('tr', 'Jovan Jovanović').within(() => {
+      cy.get('[data-cy="cancel-order-btn"]').click();
+    });
+
+    cy.contains('button', 'Potvrdi otkazivanje').click();
+
+    cy.wait('@cancelOrder');
+    cy.wait('@getOrders');
   });
 });
