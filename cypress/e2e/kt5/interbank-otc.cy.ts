@@ -90,7 +90,7 @@ describe('Scenario 4: Ponude druge banke', () => {
 describe('Scenario 5: Kreiranje cross-bank ponude', () => {
 
   it('Kreira ponudu za Banka 2 sa cenom, količinom i premiumom', () => {
-    cy.intercept('POST', /\/otc\/offers/, { statusCode: 201, body: { id: 11, stockTicker: 'GOOGL' } }).as('createOffer');
+    cy.intercept('POST', /\/api\/interbank\/otc\/negotiations/, { statusCode: 201, body: { localId: 'neg-11' } }).as('createOffer');
 
     cy.visit('/otc/create', {
       onBeforeLoad(win: any) {
